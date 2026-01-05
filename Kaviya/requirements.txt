@@ -6,3 +6,4 @@ pillow
 matplotlib
 tqdm
 pyyaml
+https://pytorch.org/
