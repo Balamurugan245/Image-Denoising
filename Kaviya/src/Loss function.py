@@ -13,11 +13,11 @@ class SSIMLoss(nn.Module):
         mu_x = F.avg_pool2d(x, self.window_size, 1, self.window_size // 2)
         mu_y = F.avg_pool2d(y, self.window_size, 1, self.window_size // 2)
 
-        sigma_x = F.avg_pool2d(x*x, self.window_size, 1, self.window_size // 2) - mu_x**2
-        sigma_y = F.avg_pool2d(y*y, self.window_size, 1, self.window_size // 2) - mu_y**2
-        sigma_xy = F.avg_pool2d(x*y, self.window_size, 1, self.window_size // 2) - mu_x*mu_y
+        sigma_x = F.avg_pool2d(x * x, self.window_size, 1, self.window_size // 2) - mu_x ** 2
+        sigma_y = F.avg_pool2d(y * y, self.window_size, 1, self.window_size // 2) - mu_y ** 2
+        sigma_xy = F.avg_pool2d(x * y, self.window_size, 1, self.window_size // 2) - mu_x * mu_y
 
-        ssim = ((2*mu_x*mu_y + C1)*(2*sigma_xy + C2)) / \
-               ((mu_x**2 + mu_y**2 + C1)*(sigma_x + sigma_y + C2))
+        ssim = ((2 * mu_x * mu_y + C1) * (2 * sigma_xy + C2)) / \
+               ((mu_x ** 2 + mu_y ** 2 + C1) * (sigma_x + sigma_y + C2))
 
         return 1 - ssim.mean()
