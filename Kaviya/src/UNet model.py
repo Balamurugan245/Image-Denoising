@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 class DoubleConv(nn.Module):
     def __init__(self, in_ch, out_ch):
@@ -13,7 +12,6 @@ class DoubleConv(nn.Module):
             nn.BatchNorm2d(out_ch),
             nn.ReLU(inplace=True),
         )
-
     def forward(self, x):
         return self.conv(x)
 
@@ -24,29 +22,34 @@ class Down(nn.Module):
             nn.MaxPool2d(2),
             DoubleConv(in_ch, out_ch)
         )
-
     def forward(self, x):
         return self.down(x)
 
 class Up(nn.Module):
     def __init__(self, in_ch, out_ch):
         super().__init__()
-        self.up = nn.ConvTranspose2d(in_ch, in_ch // 2, 2, stride=2)
+        self.up = nn.ConvTranspose2d(in_ch, in_ch//2, 2, stride=2)
         self.conv = DoubleConv(in_ch, out_ch)
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
-        diffY = x2.size(2) - x1.size(2)
-        diffX = x2.size(3) - x1.size(3)
-        x1 = F.pad(x1, [diffX//2, diffX-diffX//2,
-                        diffY//2, diffY-diffY//2])
-        return self.conv(torch.cat([x2, x1], dim=1))
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+        x1 = nn.functional.pad(x1, [diffX//2, diffX-diffX//2, diffY//2, diffY-diffY//2])
+        x = torch.cat([x2, x1], dim=1)
+        return self.conv(x)
+
+class OutConv(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super().__init__()
+        self.conv = nn.Conv2d(in_ch, out_ch, 1)
+    def forward(self, x):
+        return self.conv(x)
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=3):
+    def __init__(self, n_channels=3, n_classes=3):
         super().__init__()
-
-        self.inc = DoubleConv(in_channels, 64)
+        self.inc = DoubleConv(n_channels, 64)
         self.down1 = Down(64, 128)
         self.down2 = Down(128, 256)
         self.down3 = Down(256, 512)
@@ -57,8 +60,8 @@ class UNet(nn.Module):
         self.up3 = Up(256, 128)
         self.up4 = Up(128, 64)
 
-        self.out = nn.Conv2d(64, out_channels, 1)
-        self.final = nn.Sigmoid()
+        self.outc = OutConv(64, n_classes)
+        self.final = nn.Sigmoid() 
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -72,4 +75,5 @@ class UNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
 
-        return self.final(self.out(x))
+        x = self.outc(x)
+        return self.final(x)
