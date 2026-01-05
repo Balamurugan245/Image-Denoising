@@ -10,11 +10,6 @@ paths:
     noisy_test: data/01-raw/noisy
     output: data/04-predictions
 
-model:
-  name: UNet
-  in_channels: 3
-  out_channels: 3
-
 training:
   epochs: 200
   batch_size: 4
