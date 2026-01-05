@@ -13,6 +13,11 @@ The model is trained on paired **noisy and clean images** to remove noise while 
 - `config/` – Configuration file  
 - `data/` – Datasets  
 
+## 📓 Google Colab Notebook
+
+Run this project interactively on Google Colab:
+🔗(https://colab.research.google.com/drive/1YKwdbUpzP1u0mHi-0LS2BNs9tFMA6OD8)
+
 ## Train & Inference
 ```bash
 python entrypoint/train.py
