@@ -14,21 +14,25 @@ unet-cbam-denoising/
 │
 ├── src/
 
-│ ├── train.py # Main training script
+│     ├── train.py # Main training script
 
-│ ├── dataset.py # Dataset loader
+│     ├── dataset.py # Dataset loader
 
-│ ├── model.py # UNet + CBAM model
+│     ├── model.py # UNet + CBAM model
 
-│ ├── loss.py # IoU loss
+│     ├── loss.py # IoU loss
 
-│ └── visualize.py # Visualization utilities
+│     └── visualize.py # Visualization utilities
 │
+
 ├── config.py # Hyperparameters and paths
+
 ├── notebooks/
-│ └── UNet_training.ipynb
+
+│      └── UNet_training.ipynb
 │
 ├── requirements.txt
+
 └── README.md
 
 ---
