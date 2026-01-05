@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from src.model import UNet
+from src.unet_model import UNet
 from src.dataset import DrawingDenoiseDataset
 from src.loss_function import SSIMLoss
 from src.train_pipeline import train
