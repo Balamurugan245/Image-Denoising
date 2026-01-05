@@ -16,6 +16,6 @@ The model is trained on paired **noisy and clean images** to remove noise while 
 ```bash
 python entrypoint/train.py
 python entrypoint/inference.py
-
+```
 
 Author: Kaviya
