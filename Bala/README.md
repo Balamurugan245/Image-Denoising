@@ -13,6 +13,7 @@ any system (local machine, server, Kaggle, or Colab).
 unet-cbam-denoising/
 │
 ├── src/
+
 │ ├── train.py # Main training script
 │ ├── dataset.py # Dataset loader
 │ ├── model.py # UNet + CBAM model
