@@ -1,14 +1,12 @@
 project:
   name: Image Denoising UNet
   
-device: auto
+device: "cuda" 
 
-paths:
-  data:
-    noisy_train: data/01-raw/noisy
-    clean_train: data/01-raw/clean
-    noisy_test: data/01-raw/noisy
-    output: data/04-predictions
+dataset:
+  train_noisy: "data/train/noisy"
+  train_clean: "data/train/clean"
+  test_noisy: "data/test/noisy"
 
 training:
   epochs: 200
@@ -19,6 +17,3 @@ training:
 loss:
   l1_weight: 0.8
   ssim_weight: 0.2
-
-inference:
-  save_format: png
