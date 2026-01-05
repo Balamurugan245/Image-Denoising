@@ -9,15 +9,10 @@ The model is trained on paired **noisy and clean images** to remove noise while 
 
 ## Structure
 - `entrypoint/` – Training and inference scripts  
-- `src/` – Model, dataset, loss, and pipelines  
+- `src/` – Model, dataset, loss, and utils
 - `config/` – Configuration file  
 - `data/` – Datasets  
 
-## 📓 Google Colab Notebook
-
-Run this project interactively on Google Colab:
-
-🔗(https://colab.research.google.com/drive/1YKwdbUpzP1u0mHi-0LS2BNs9tFMA6OD8)
 
 ## Train & Inference
 ```bash
