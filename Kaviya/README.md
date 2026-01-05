@@ -13,13 +13,9 @@ The model is trained on paired **noisy and clean images** to remove noise while 
 - `config/` – Configuration file  
 - `data/` – Datasets  
 
-## Train
+## Train & Inference
 ```bash
 python entrypoint/train.py
-
-
-## Inference
-```bash
 python entrypoint/inference.py
 
 
