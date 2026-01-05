@@ -3,9 +3,6 @@
 This project implements an image denoising model using a UNet architecture
 enhanced with CBAM (Channel and Spatial Attention).
 
-The code is written in a clean, modular format so that it can run on
-any system (local machine, server, Kaggle, or Colab).
-
 ---
 
 ## Project Structure
@@ -38,8 +35,6 @@ Dataset-1k/New_Data100/
 ├── image1.png
 └── image2.png
 ```
-Noisy and clean images must have the same filenames.
-
 ---
 
 ## How to Run the Code
