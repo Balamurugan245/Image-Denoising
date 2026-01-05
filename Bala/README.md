@@ -10,7 +10,7 @@ any system (local machine, server, Kaggle, or Colab).
 
 ## Project Structure
 ```
-unet-cbam-denoising/
+Bala/
 │
 ├── src/
 │ ├── train.py # Main training script
@@ -20,9 +20,7 @@ unet-cbam-denoising/
 │ └── visualize.py # Visualization utilities
 │
 ├── config.py # Hyperparameters and paths
-├── notebooks/
-│ └── UNet_training.ipynb
-│
+├── UNet_training.ipynb #colab file
 ├── requirements.txt
 └── README.md
 ```
