@@ -9,10 +9,8 @@ The model is trained on paired **noisy and clean images** to remove noise while 
 
 ## Structure
 - `entrypoint/` – Training and inference scripts  
-- `src/` – Model, dataset, loss, and utils
+- `src/` – Model, dataset, loss, datasets and utils
 - `config/` – Configuration file  
-- `data/` – Datasets  
-
 
 ## Train & Inference
 ```bash
