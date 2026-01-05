@@ -12,6 +12,18 @@ The model is trained on paired **noisy and clean images** to remove noise while 
 - `src/` – Model, dataset, loss, datasets and utils
 - `config/` – Configuration file  
 
+## Dataset Structure
+
+```
+Dataset-1k/New_Data100/
+├── Noisy/
+│ ├── image1.png
+│ └── image2.png
+└── Clean/
+├── image1.png
+└── image2.png
+```
+---
 ## Train & Test
 ```bash
 python entrypoint/train.py
