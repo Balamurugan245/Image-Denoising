@@ -8,12 +8,17 @@ class DrawingDenoiseDataset(Dataset):
         self.noisy_dir = noisy_dir
         self.clean_dir = clean_dir
 
-        noisy_map = {os.path.splitext(f)[0]: f for f in os.listdir(noisy_dir)}
-        clean_map = {os.path.splitext(f)[0]: f for f in os.listdir(clean_dir)}
+        noisy_files = os.listdir(noisy_dir)
+        clean_files = os.listdir(clean_dir)
 
-        self.keys = sorted(noisy_map.keys() & clean_map.keys())
+        noisy_map = {os.path.splitext(f)[0]: f for f in noisy_files}
+        clean_map = {os.path.splitext(f)[0]: f for f in clean_files}
+
+        self.keys = sorted(list(noisy_map.keys() & clean_map.keys()))
         self.noisy_map = noisy_map
         self.clean_map = clean_map
+
+        print(f"Using {len(self.keys)} matched image pairs")
 
         self.transform = T.Compose([
             T.Resize((img_size, img_size)),
@@ -32,8 +37,8 @@ class DrawingDenoiseDataset(Dataset):
 
 class NoisyOnlyDataset(Dataset):
     def __init__(self, noisy_dir, img_size=224):
-        self.files = sorted(os.listdir(noisy_dir))
         self.noisy_dir = noisy_dir
+        self.files = sorted(os.listdir(noisy_dir))
         self.transform = T.Compose([
             T.Resize((img_size, img_size)),
             T.ToTensor()
@@ -43,6 +48,7 @@ class NoisyOnlyDataset(Dataset):
         return len(self.files)
 
     def __getitem__(self, idx):
-        name = self.files[idx]
-        img = Image.open(os.path.join(self.noisy_dir, name)).convert("RGB")
-        return self.transform(img), name
+        img_name = self.files[idx]
+        img_path = os.path.join(self.noisy_dir, img_name)
+        img = Image.open(img_path).convert("RGB")
+        return self.transform(img), img_name
