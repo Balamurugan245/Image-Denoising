@@ -13,7 +13,7 @@ any system (local machine, server, Kaggle, or Colab).
 unet-cbam-denoising/
 │
 ├── src/
-│ ├── train.py # Training script
+│ ├── train.py # Main training script
 │ ├── dataset.py # Dataset loader
 │ ├── model.py # UNet + CBAM model
 │ ├── loss.py # IoU loss
@@ -25,9 +25,6 @@ unet-cbam-denoising/
 │
 ├── requirements.txt
 └── README.md
-
-yaml
-Copy code
 
 ---
 
@@ -43,54 +40,48 @@ Dataset-1k/New_Data100/
 ├── image1.png
 └── image2.png
 
-yaml
-Copy code
-
 Noisy and clean images must have the same filenames.
 
 ---
 
-## Training
+## How to Run the Code
 
-Install dependencies:
+### 1. Install Dependencies
 
-```bash
 pip install -r requirements.txt
-Run training:
 
-bash
-Copy code
-python src/train.py
-All training parameters are defined in config.py.
+### 2. Configure Paths and Hyperparameters
 
-Model Description
-UNet encoder–decoder architecture
-
-CBAM attention blocks for feature refinement
-
-IoU-based loss for structural consistency
-
-Visualization
-Predictions can be visualized using the functions provided in
-visualize.py, which show noisy input, predicted output, and clean ground truth.
-
-Author
-Academic deep learning project
-
-yaml
-Copy code
+Edit `config.py` to set:
+- Dataset path
+- Batch size
+- Epochs
+- Learning rate
 
 ---
 
-If you want, next I can give you:
-- `requirements.txt` (single copy-paste)
-- `config.py` (single copy-paste)
-- a **sir-impressing** short README (even more minimal)
+### 3. Train the Model
 
-Just tell me 👍
+python src/train.py
 
+Training logs will be printed in the terminal.
 
+---
 
+## Model Description
 
+- UNet encoder–decoder architecture
+- CBAM attention blocks for feature refinement
+- IoU-based loss for structural consistency
 
+---
 
+## Visualization
+
+Predictions can be visualized using functions provided in `visualize.py`.
+The visualization shows:
+- Noisy input image
+- Predicted denoised output
+- Clean ground truth image
+
+---
