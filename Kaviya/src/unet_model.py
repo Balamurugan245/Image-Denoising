@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class DoubleConv(nn.Module):
     def __init__(self, in_ch, out_ch):
@@ -35,7 +36,7 @@ class Up(nn.Module):
         x1 = self.up(x1)
         diffY = x2.size()[2] - x1.size()[2]
         diffX = x2.size()[3] - x1.size()[3]
-        x1 = nn.functional.pad(x1, [diffX//2, diffX-diffX//2, diffY//2, diffY-diffY//2])
+        x1 = F.pad(x1, [diffX//2, diffX-diffX//2, diffY//2, diffY-diffY//2])
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
 
@@ -61,7 +62,7 @@ class UNet(nn.Module):
         self.up4 = Up(128, 64)
 
         self.outc = OutConv(64, n_classes)
-        self.final = nn.Sigmoid() 
+        self.final = nn.Sigmoid()  # output range [0,1]
 
     def forward(self, x):
         x1 = self.inc(x)
