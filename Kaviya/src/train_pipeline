@@ -1,0 +1,16 @@
+def train_one_epoch(model, loader, optimizer, loss_fn, device):
+    model.train()
+    total_loss = 0
+
+    for noisy, clean in loader:
+        noisy, clean = noisy.to(device), clean.to(device)
+
+        optimizer.zero_grad()
+        pred = model(noisy)
+        loss = loss_fn(pred, clean)
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    return total_loss / len(loader)
