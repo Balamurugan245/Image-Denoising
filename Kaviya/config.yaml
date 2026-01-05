@@ -1,9 +1,7 @@
 device: "cuda" 
 
 dataset:
-  train_noisy: "data/train/noisy"
-  train_clean: "data/train/clean"
-  test_noisy: "data/test/noisy"
+Data_path = "data/Dataset-1k/New_Data100""
 
 training:
   epochs: 200
