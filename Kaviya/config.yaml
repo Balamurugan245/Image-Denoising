@@ -1,0 +1,28 @@
+project:
+  name: Image Denoising UNet
+  seed: 42
+
+paths:
+  data:
+    noisy_train: data/01-raw/noisy
+    clean_train: data/01-raw/clean
+    noisy_test: data/01-raw/noisy
+    output: data/04-predictions
+
+model:
+  name: UNet
+  in_channels: 3
+  out_channels: 3
+
+training:
+  epochs: 200
+  batch_size: 4
+  learning_rate: 0.0001
+  optimizer: adam
+
+loss:
+  l1_weight: 0.8
+  ssim_weight: 0.2
+
+inference:
+  save_format: png
