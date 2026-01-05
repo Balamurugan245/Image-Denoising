@@ -9,38 +9,29 @@ any system (local machine, server, Kaggle, or Colab).
 ---
 
 ## Project Structure
-
+```
 unet-cbam-denoising/
 │
 ├── src/
-
-│     ├── train.py # Main training script
-
-│     ├── dataset.py # Dataset loader
-
-│     ├── model.py # UNet + CBAM model
-
-│     ├── loss.py # IoU loss
-
-│     └── visualize.py # Visualization utilities
+│ ├── train.py # Main training script
+│ ├── dataset.py # Dataset loader
+│ ├── model.py # UNet + CBAM model
+│ ├── loss.py # IoU loss
+│ └── visualize.py # Visualization utilities
 │
-
 ├── config.py # Hyperparameters and paths
-
 ├── notebooks/
-
-│      └── UNet_training.ipynb
+│ └── UNet_training.ipynb
 │
 ├── requirements.txt
-
 └── README.md
-
+```
 ---
 
 ## Dataset Structure
 
 The dataset should be arranged as:
-
+```
 Dataset-1k/New_Data100/
 ├── Noisy/
 │ ├── image1.png
@@ -48,7 +39,7 @@ Dataset-1k/New_Data100/
 └── Clean/
 ├── image1.png
 └── image2.png
-
+```
 Noisy and clean images must have the same filenames.
 
 ---
