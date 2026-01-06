@@ -9,7 +9,7 @@ from torchmetrics.functional import structural_similarity_index_measure
 import matplotlib.pyplot as plt
 
 from dataset import DenoisingDataset
-from unet import UNet
+from Unet import UNet
 
 
 def ssim_loss(pred, target):
@@ -88,3 +88,4 @@ def train():
         save_image(fixed_noisy, f"{epoch_dir}/noisy.png")
         save_image(pred, f"{epoch_dir}/denoised.png")
         save_image(fixed_clean, f"{epoch_dir}/clean.png")
+
