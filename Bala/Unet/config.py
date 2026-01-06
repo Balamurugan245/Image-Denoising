@@ -16,6 +16,6 @@ class Config:
     LR_FACTOR = 0.5
 
     # paths (Kaggle)
-    data_root = "/kaggle/input/input-data/Dataset-1k/New_Data100"
+    data_root = "/kaggle/input/partdrawing/Dataset-1k/New_Data100"
     checkpoint_dir = "checkpoints"
     prediction_dir = "predictions"
