@@ -1,16 +1,19 @@
 class Config:
     # data
-    image_size = 512
-    batch_size = 2
-    val_ratio = 0.2
+    IMAGE_SIZE = 512
+    BATCH_SIZE = 4
+    VAL_SPLIT = 0.2
 
     # training
-    epochs = 40
-    lr = 1e-4
-    weight_decay = 1e-5
+    EPOCHS = 40
+    LR = 1e-4
+    WEIGHT_DECAY = 1e-4
 
-    # loss weights
-    ssim_weight = 0.5
+    # optimization
+    USE_AMP = True
+    GRAD_CLIP = 1.0
+    LR_PATIENCE = 5
+    LR_FACTOR = 0.5
 
     # paths (Kaggle)
     data_root = "/kaggle/input/input-data/Dataset-1k/New_Data100"
