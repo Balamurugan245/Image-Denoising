@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Unet_parts import DoubleConv
+from Unet_parts import DoubleConv, Up ,Down, Outconv
 
 
 class UNet(nn.Module):
@@ -31,4 +31,5 @@ class UNet(nn.Module):
         x = self.u2(torch.cat([x, c1], dim=1))
 
         return self.out(x)
+
 
