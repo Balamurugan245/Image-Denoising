@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .Unet_parts import DoubleConv
+from Unet_parts import DoubleConv
 
 class Down(nn.Module):
     def __init__(self, in_c, out_c):
@@ -49,4 +49,5 @@ class UNetCBAM(nn.Module):
         x = self.u3(x, c2)
         x = self.u4(x, c1)
         return torch.sigmoid(self.out(x))
+
 
