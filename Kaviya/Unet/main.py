@@ -1,7 +1,7 @@
 import torch
 from config import Config
 from dataset import get_dataloaders
-from unet import UNet
+from Unet import UNet
 from train_model import Trainer
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -27,3 +27,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
