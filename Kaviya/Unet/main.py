@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from config import Config
 from dataset import DenoisingDataset
 from unet import UNet
-from train_model import Trainer
+from train_model import train
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print("Device:", DEVICE)
@@ -31,3 +31,4 @@ optimizer = torch.optim.Adam(
 
 trainer = Trainer(train_loader, val_loader, optimizer, DEVICE)
 trainer.start(model, Config.epochs, Config.checkpoint_dir)
+
