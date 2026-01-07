@@ -29,8 +29,9 @@ optimizer = torch.optim.Adam(
     weight_decay=Config.weight_decay
 )
 
-trainer = train(train_loader, val_loader, optimizer, DEVICE)
+trainer = train()
 trainer.start(model, Config.epochs, Config.checkpoint_dir)
+
 
 
 
