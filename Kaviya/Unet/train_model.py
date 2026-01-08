@@ -47,6 +47,7 @@ def train():
     fixed_noisy, fixed_clean = fixed_noisy.to(device), fixed_clean.to(device)
 
     EPOCHS = 40
+    scaler = torch.cuda.amp.GradScaler(enabled=(DEVICE == "cuda"))
     train_losses, val_losses = [], []
 
     for epoch in range(1, EPOCHS + 1):
@@ -68,12 +69,11 @@ def train():
 
         model.eval()
         val_loss = 0.0
-        with torch.no_grad():
+        with torch.inference_mode(), torch.cuda.amp.autocast(enabled=(DEVICE == "cuda")):
             for noisy, clean in val_loader:
-                noisy, clean = noisy.to(device), clean.to(device)
+                noisy, clean = noisy.to(DEVICE), clean.to(DEVICE)
                 val_loss += combined_loss(model(noisy), clean).item()
-
-        val_loss /= len(val_loader)
+                val_loss /= len(val_loader)
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
@@ -88,4 +88,5 @@ def train():
         save_image(fixed_noisy, f"{epoch_dir}/noisy.png")
         save_image(pred, f"{epoch_dir}/denoised.png")
         save_image(fixed_clean, f"{epoch_dir}/clean.png")
+
 
