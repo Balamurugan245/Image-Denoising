@@ -46,21 +46,20 @@ def train():
     os.makedirs("checkpoints", exist_ok=True)
     os.makedirs("predictions", exist_ok=True)
 
-    # Fixed sample for inference every epoch
     fixed_noisy, fixed_clean = next(iter(val_loader))
     fixed_noisy = fixed_noisy.to(DEVICE)
     fixed_clean = fixed_clean.to(DEVICE)
 
-    EPOCHS = 40
+    epochs = 40
     scaler = torch.cuda.amp.GradScaler(enabled=(DEVICE == "cuda"))
 
     train_losses, val_losses = [], []
 
-    for epoch in range(1, EPOCHS + 1):
+    for epoch in range(1, epochs + 1):
         model.train()
         train_loss = 0.0
 
-        pbar = tqdm(train_loader, desc=f"Epoch [{epoch}/{EPOCHS}]")
+        pbar = tqdm(train_loader, desc=f"Epoch [{epoch}/{epochs}]")
         for noisy, clean in pbar:
             noisy = noisy.to(DEVICE, non_blocking=True)
             clean = clean.to(DEVICE, non_blocking=True)
@@ -113,3 +112,4 @@ def train():
 
 if __name__ == "__main__":
     train()
+
