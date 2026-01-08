@@ -51,7 +51,7 @@ def train():
     fixed_clean = fixed_clean.to(DEVICE)
 
     epochs = 40
-    scaler = torch.cuda.amp.GradScaler(enabled=(DEVICE == "cuda"))
+    scaler = torch.amp.GradScaler("cuda", enabled=(DEVICE == "cuda"))
 
     train_losses, val_losses = [], []
 
@@ -66,7 +66,7 @@ def train():
 
             optimizer.zero_grad(set_to_none=True)
 
-            with torch.cuda.amp.autocast(enabled=(DEVICE == "cuda")):
+            with torch.amp.autocast("cuda", enabled=(DEVICE == "cuda")):
                 output = model(noisy)
                 loss = combined_loss(output, clean)
             scaler.scale(loss).backward()
@@ -79,7 +79,7 @@ def train():
 
         model.eval()
         val_loss = 0.0
-        with torch.inference_mode(), torch.cuda.amp.autocast(enabled=(DEVICE == "cuda")):
+        with torch.inference_mode(), torch.amp.autocast("cuda", enabled=(DEVICE == "cuda")):
             for noisy, clean in val_loader:
                 noisy = noisy.to(DEVICE, non_blocking=True)
                 clean = clean.to(DEVICE, non_blocking=True)
@@ -112,4 +112,5 @@ def train():
 
 if __name__ == "__main__":
     train()
+
 
