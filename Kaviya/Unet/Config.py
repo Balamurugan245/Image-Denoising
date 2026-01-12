@@ -3,7 +3,7 @@ class Config:
     batch_size = 2
     val_ratio = 0.2
 
-    epochs = 40
+    epochs = 30
     lr = 1e-4
     weight_decay = 1e-5
 
