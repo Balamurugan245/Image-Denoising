@@ -1,6 +1,7 @@
 class Config:
     # data
     IMAGE_SIZE = 512
+    IMAGE_SIZE_NEW = 384
     BATCH_SIZE = 4
     VAL_SPLIT = 0.2
 
