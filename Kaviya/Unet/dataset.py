@@ -27,7 +27,7 @@ class DenoisingDataset(Dataset):
         self.indices = train_idx if split == "train" else val_idx
         self.noisy_images = noisy_images
         self.clean_images = clean_images
-        self.transform = transforms.ToTensor()
+        self.transform = transform if transform else transforms.ToTensor()
 
     def __len__(self):
         return len(self.indices)
@@ -42,3 +42,4 @@ class DenoisingDataset(Dataset):
         clean = Image.open(clean_path).convert("L")
 
         return self.transform(noisy), self.transform(clean)
+
