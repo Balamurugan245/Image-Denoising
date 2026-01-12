@@ -12,4 +12,5 @@ def run_inference(model_path, input_tensor):
     with torch.no_grad():
         output = model(input_tensor.to(device))
 
-    save_image(output, "denoised.png")
+    output = torch.clamp(output, 0, 1)
+    save_image(torch.cat([input_tensor, output.cpu()], dim=0), "compare.png", nrow=2)
