@@ -1,117 +1,82 @@
 import os
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision.utils import save_image
 from tqdm import tqdm
+from torchvision.utils import save_image
 from torchmetrics.functional import structural_similarity_index_measure
-
-from dataset import DenoisingDataset
-from Unet import UNet
 
 
 def ssim_loss(pred, target):
-    return 1 - structural_similarity_index_measure(
-        pred, target, data_range=1.0
-    )
+    return 1 - structural_similarity_index_measure(pred, target, data_range=1.0)
 
 
-def train():
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+class Trainer:
+    def __init__(self, device, checkpoint_dir="checkpoints", pred_dir="predictions"):
+        self.device = device
+        self.checkpoint_dir = checkpoint_dir
+        self.pred_dir = pred_dir
+        os.makedirs(checkpoint_dir, exist_ok=True)
+        os.makedirs(pred_dir, exist_ok=True)
 
-    DATA_ROOT = "/kaggle/input/input-data/Dataset-1k/New_Data100"
+        self.l1_loss = nn.L1Loss()
 
-    train_dataset = DenoisingDataset(
-        f"{DATA_ROOT}/Noisy", f"{DATA_ROOT}/Clean", split="train"
-    )
-    val_dataset = DenoisingDataset(
-        f"{DATA_ROOT}/Noisy", f"{DATA_ROOT}/Clean", split="val"
-    )
+    def combined_loss(self, pred, target):
+        return self.l1_loss(pred, target) + 0.5 * ssim_loss(pred, target)
 
-    train_loader = DataLoader(
-        train_dataset, batch_size=2, shuffle=True, pin_memory=True
-    )
-    val_loader = DataLoader(
-        val_dataset, batch_size=1, shuffle=False, pin_memory=True
-    )
+    def start(self, model, train_loader, val_loader, optimizer, epochs):
+        scaler = torch.amp.GradScaler("cuda", enabled=(self.device == "cuda"))
 
-    model = UNet().to(DEVICE)
-    optimizer = optim.Adam(model.parameters(), lr=1e-4)
-    l1_loss = nn.L1Loss()
+        fixed_noisy, fixed_clean = next(iter(val_loader))
+        fixed_noisy = fixed_noisy.to(self.device)
+        fixed_clean = fixed_clean.to(self.device)
 
-    def combined_loss(pred, target):
-        return l1_loss(pred, target) + 0.5 * ssim_loss(pred, target)
+        for epoch in range(1, epochs + 1):
+            model.train()
+            train_loss = 0.0
 
-    os.makedirs("checkpoints", exist_ok=True)
-    os.makedirs("predictions", exist_ok=True)
+            pbar = tqdm(train_loader, desc=f"Epoch [{epoch}/{epochs}]")
+            for noisy, clean in pbar:
+                noisy = noisy.to(self.device)
+                clean = clean.to(self.device)
 
-    fixed_noisy, fixed_clean = next(iter(val_loader))
-    fixed_noisy = fixed_noisy.to(DEVICE)
-    fixed_clean = fixed_clean.to(DEVICE)
+                optimizer.zero_grad(set_to_none=True)
 
-    epochs = 40
-    scaler = torch.amp.GradScaler("cuda", enabled=(DEVICE == "cuda"))
+                with torch.amp.autocast("cuda", enabled=(self.device == "cuda")):
+                    output = model(noisy)
+                    loss = self.combined_loss(output, clean)
 
-    train_losses, val_losses = [], []
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
 
-    for epoch in range(1, epochs + 1):
-        model.train()
-        train_loss = 0.0
+                train_loss += loss.item()
+                pbar.set_postfix(loss=f"{loss.item():.4f}")
 
-        pbar = tqdm(train_loader, desc=f"Epoch [{epoch}/{epochs}]")
-        for noisy, clean in pbar:
-            noisy = noisy.to(DEVICE, non_blocking=True)
-            clean = clean.to(DEVICE, non_blocking=True)
+            train_loss /= len(train_loader)
 
-            optimizer.zero_grad(set_to_none=True)
+            model.eval()
+            val_loss = 0.0
+            with torch.inference_mode():
+                for noisy, clean in val_loader:
+                    noisy = noisy.to(self.device)
+                    clean = clean.to(self.device)
+                    val_loss += self.combined_loss(model(noisy), clean).item()
 
-            with torch.amp.autocast("cuda", enabled=(DEVICE == "cuda")):
-                output = model(noisy)
-                loss = combined_loss(output, clean)
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
+            val_loss /= len(val_loader)
 
-            train_loss += loss.item()
-            pbar.set_postfix(loss=f"{loss.item():.4f}")
-        train_loss /= len(train_loader)
+            print(f"Epoch {epoch} | Train: {train_loss:.4f} | Val: {val_loss:.4f}")
 
-        model.eval()
-        val_loss = 0.0
-        with torch.inference_mode(), torch.amp.autocast("cuda", enabled=(DEVICE == "cuda")):
-            for noisy, clean in val_loader:
-                noisy = noisy.to(DEVICE, non_blocking=True)
-                clean = clean.to(DEVICE, non_blocking=True)
-                val_loss += combined_loss(model(noisy), clean).item()
+            torch.save(
+                model.state_dict(),
+                os.path.join(self.checkpoint_dir, f"model_epoch_{epoch:02d}.pth")
+            )
 
-        val_loss /= len(val_loader)
+            with torch.inference_mode():
+                pred = model(fixed_noisy)
 
-        train_losses.append(train_loss)
-        val_losses.append(val_loss)
+            epoch_dir = os.path.join(self.pred_dir, f"epoch_{epoch:02d}")
+            os.makedirs(epoch_dir, exist_ok=True)
 
-        print(
-            f"Epoch {epoch} | "
-            f"Train Loss: {train_loss:.4f} | "
-            f"Val Loss: {val_loss:.4f}")
-        torch.save(
-            model.state_dict(),
-            f"checkpoints/model_epoch_{epoch:02d}.pth"
-        )
-        model.eval()
-        with torch.inference_mode(), torch.cuda.amp.autocast(enabled=(DEVICE == "cuda")):
-            pred = model(fixed_noisy)
-
-        epoch_dir = f"predictions/epoch_{epoch:02d}"
-        os.makedirs(epoch_dir, exist_ok=True)
-
-        save_image(fixed_noisy, f"{epoch_dir}/noisy.png")
-        save_image(pred, f"{epoch_dir}/denoised.png")
-        save_image(fixed_clean, f"{epoch_dir}/clean.png")
-
-
-if __name__ == "__main__":
-    train()
-
-
-
+            save_image(fixed_noisy, f"{epoch_dir}/noisy.png")
+            save_image(pred, f"{epoch_dir}/denoised.png")
+            save_image(fixed_clean, f"{epoch_dir}/clean.png")
