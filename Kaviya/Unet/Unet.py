@@ -2,36 +2,33 @@ import torch
 import torch.nn as nn
 from Unet_parts import DoubleConv, Down, Up, OutConv
 
-
 class UNet(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.d1 = DoubleConv(1, 64)
-        self.d2 = DoubleConv(64, 128)
-        self.d3 = DoubleConv(128, 256)
+        self.inc = DoubleConv(1, 64)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 256)
+        self.down3 = Down(256, 512)
+        self.down4 = Down(512, 1024)
 
-        self.pool = nn.MaxPool2d(2)
-        self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
+        self.up1 = Up(1024, 512)
+        self.up2 = Up(512, 256)
+        self.up3 = Up(256, 128)
+        self.up4 = Up(128, 64)
 
-        self.u1 = DoubleConv(256 + 128, 128)
-        self.u2 = DoubleConv(128 + 64, 64)
-
-        self.out = nn.Conv2d(64, 1, kernel_size=1)
+        self.outc = OutConv(64, 1)
 
     def forward(self, x):
-        c1 = self.d1(x)
-        c2 = self.d2(self.pool(c1))
-        c3 = self.d3(self.pool(c2))
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
 
-        x = self.up(c3)
-        x = self.u1(torch.cat([x, c2], dim=1))
+        x = self.up1(x5, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
 
-        x = self.up(x)
-        x = self.u2(torch.cat([x, c1], dim=1))
-
-        return self.out(x)
-
-
-
-
+        return self.outc(x)
