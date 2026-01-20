@@ -26,11 +26,11 @@ class DenoiseDataset(Dataset):
 
         noisy = Image.open(
             os.path.join(self.noisy_dir, self.noisy_map[key])
-        ).convert("RGB")
+        ).convert("L")
 
         clean = Image.open(
             os.path.join(self.clean_dir, self.clean_map[key])
-        ).convert("RGB")
+        ).convert("L")
 
         return self.transform(noisy), self.transform(clean)
 
@@ -49,3 +49,4 @@ def get_transforms(train=True):
             T.Resize((512, 512)),
             T.ToTensor()
         ])
+
