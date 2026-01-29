@@ -1,7 +1,8 @@
 import os
+import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
-import torchvision.transforms as T
+
 
 class DenoiseDataset(Dataset):
     def __init__(self, root, transform):
@@ -23,30 +24,18 @@ class DenoiseDataset(Dataset):
 
     def __getitem__(self, idx):
         key = self.keys[idx]
-
-        noisy = Image.open(
+    
+        noisy = np.array(Image.open(
             os.path.join(self.noisy_dir, self.noisy_map[key])
-        ).convert("L")
-
-        clean = Image.open(
+        ).convert("L"))
+    
+        clean = np.array(Image.open(
             os.path.join(self.clean_dir, self.clean_map[key])
-        ).convert("L")
-
-        return self.transform(noisy), self.transform(clean)
-
-
-def get_transforms(train=True):
-    if train:
-        return T.Compose([
-            T.Resize((512, 512)),
-            T.RandomHorizontalFlip(0.5),
-            T.RandomVerticalFlip(0.5),
-            T.ColorJitter(0.2, 0.2),
-            T.ToTensor()
-        ])
-    else:
-        return T.Compose([
-            T.Resize((512, 512)),
-            T.ToTensor()
-        ])
-
+        ).convert("L"))
+    
+        augmented = self.transform(image=noisy, mask=clean)
+    
+        noisy = augmented["image"]
+        clean = augmented["mask"]
+    
+        return noisy, clean
