@@ -9,6 +9,7 @@ from albumentations.pytorch import ToTensorV2
 
 def get_train_augmentation():
     return A.Compose([
+        A.Resize(Config.image_size, Config.image_size),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.RandomRotate90(p=0.5),
@@ -21,7 +22,6 @@ def get_train_augmentation():
         A.RandomBrightnessContrast(p=0.3),
         ToTensorV2()
     ])
-
 
 def get_val_augmentation():
     return A.Compose([
@@ -75,4 +75,5 @@ class DenoisingDataset(Dataset):
         clean = augmented["mask"]
 
         return noisy, clean
+
 
