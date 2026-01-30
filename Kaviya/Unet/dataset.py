@@ -71,7 +71,8 @@ class DenoisingDataset(Dataset):
         noisy = np.array(noisy)
         clean = np.array(clean)
         augmented = self.transform(image=noisy, mask=clean)
-        noisy = augmented["image"]   # tensor [1,H,W]
+        noisy = augmented["image"] 
         clean = augmented["mask"]
 
         return noisy, clean
+
