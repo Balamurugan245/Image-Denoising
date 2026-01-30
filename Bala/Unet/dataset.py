@@ -5,10 +5,10 @@ from torch.utils.data import Dataset
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-
+IMAGE_SIZE_NEW =384
 def get_train_transform():
     return A.Compose([
-            A.Resize(384,384),
+            A.Resize(IMAGE_SIZE_NEW,IMAGE_SIZE_NEW),
             A.ShiftScaleRotate(
                 shift_limit=0.02,
                 scale_limit=0.02,
@@ -25,7 +25,7 @@ def get_train_transform():
 
 def get_val_transform():
     return A.Compose([
-            A.Resize(384,384),
+            A.Resize(IMAGE_SIZE_NEW,IMAGE_SIZE_NEW),
             ToTensorV2()],
         additional_targets={"mask": "image"}
     )
@@ -80,3 +80,4 @@ class DenoiseDataset(Dataset):
         clean = clean.float() / 255.0
 
         return noisy, clean
+
