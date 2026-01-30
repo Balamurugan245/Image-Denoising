@@ -2,18 +2,13 @@ import os
 import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
-
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from config import Config   
-
 
 def get_train_transform():
-    return A.Compose(
-        [
-            A.Resize(Config.IMAGE_SIZE_NEW, Config.IMAGE_SIZE_NEW),
-
+    return A.Compose([
+            A.Resize(384,384),
             A.ShiftScaleRotate(
                 shift_limit=0.02,
                 scale_limit=0.02,
@@ -21,26 +16,20 @@ def get_train_transform():
                 border_mode=0,
                 p=0.5
             ),
-
             A.GaussNoise(var_limit=(5.0, 15.0), p=0.3),
             A.GaussianBlur(blur_limit=3, p=0.2),
-
-            ToTensorV2()
-        ],
-        additional_targets={"mask": "image"} 
-    )
-
-
-def get_val_transform():
-    return A.Compose(
-        [
-            A.Resize(Config.IMAGE_SIZE_NEW, Config.IMAGE_SIZE_NEW),
-            ToTensorV2()
-        ],
+            ToTensorV2()],
         additional_targets={"mask": "image"}
     )
 
 
+def get_val_transform():
+    return A.Compose([
+            A.Resize(384,384),
+            ToTensorV2()],
+        additional_targets={"mask": "image"}
+    )
+    
 class DenoiseDataset(Dataset):
     def __init__(self, root, transform=None):
         self.noisy_dir = os.path.join(root, "Noisy")
@@ -74,7 +63,7 @@ class DenoiseDataset(Dataset):
             ).convert("L"),
             dtype=np.uint8
         )
-
+        
         clean = np.array(
             Image.open(
                 os.path.join(self.clean_dir, self.clean_map[key])
