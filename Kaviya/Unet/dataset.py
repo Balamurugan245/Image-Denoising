@@ -25,6 +25,7 @@ def get_train_augmentation():
 
 def get_val_augmentation():
     return A.Compose([
+        A.Resize(Config.image_size, Config.image_size),
         ToTensorV2()
     ])
 
@@ -75,5 +76,6 @@ class DenoisingDataset(Dataset):
         clean = augmented["mask"]
 
         return noisy, clean
+
 
 
