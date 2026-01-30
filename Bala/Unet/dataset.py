@@ -4,11 +4,11 @@ from PIL import Image
 from torch.utils.data import Dataset
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-
+from config import Config 
 
 def get_train_transform():
     return A.Compose([
-            A.Resize(IMAGE_SIZE_NEW, IMAGE_SIZE_NEW),
+            A.Resize(Config.IMAGE_SIZE_NEW, Config.IMAGE_SIZE_NEW),
             A.ShiftScaleRotate(
                 shift_limit=0.02,
                 scale_limit=0.02,
@@ -80,4 +80,5 @@ class DenoiseDataset(Dataset):
         clean = clean.float() / 255.0
 
         return noisy, clean
+
 
