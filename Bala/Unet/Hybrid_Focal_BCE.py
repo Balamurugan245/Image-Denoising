@@ -16,7 +16,7 @@ class FocalBCE(nn.Module):
         focal = self.alpha * (1 - pt) ** self.gamma * bce
         return focal.mean()
 
-  class HybridCADLoss(nn.Module):
+class HybridCADLoss(nn.Module):
     def __init__(self):
         super().__init__()
         self.w_charb = 0.40
