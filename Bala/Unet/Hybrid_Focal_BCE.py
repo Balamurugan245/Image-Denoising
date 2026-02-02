@@ -37,7 +37,7 @@ class HybridCADLoss(nn.Module):
         gx = F.conv2d(x, sobel_x, padding=1)
         gy = F.conv2d(x, sobel_y, padding=1)
         return torch.sqrt(gx**2 + gy**2 + 1e-6)
-      
+
     def soft_iou(self, pred, target):
         pred = (pred > 0.5).float()
         target = (target > 0.5).float()
@@ -59,4 +59,5 @@ class HybridCADLoss(nn.Module):
             self.w_iou   * loss_iou +
             self.w_bce   * loss_bce
         )
+
 
