@@ -3,9 +3,9 @@ import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
-from Config import Config
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+from Config import Config
 
 def get_geometric_aug():
     return A.Compose([
@@ -81,4 +81,5 @@ class DenoisingDataset(Dataset):
         clean = self.to_tensor(image=clean)["image"]
 
         return noisy, clean
+
 
