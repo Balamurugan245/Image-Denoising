@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-def get_train_augmentation():
+def get_geometric_aug():
     return A.Compose([
         A.Resize(Config.image_size, Config.image_size),
         A.HorizontalFlip(p=0.5),
@@ -17,15 +17,19 @@ def get_train_augmentation():
             shift_limit=0.05,
             scale_limit=0.05,
             rotate_limit=10,
-            p=0.5
+            p=0.5,
+            border_mode=0 
         ),
-        A.RandomBrightnessContrast(p=0.3),
-        ToTensorV2()
     ])
 
-def get_val_augmentation():
+def get_noisy_only_aug():
     return A.Compose([
-        A.Resize(Config.image_size, Config.image_size),
+        A.RandomBrightnessContrast(p=0.3),
+    ])
+
+def get_to_tensor():
+    return A.Compose([
+        A.Normalize(mean=(0.0,), std=(1.0,)),  
         ToTensorV2()
     ])
 
@@ -34,11 +38,6 @@ class DenoisingDataset(Dataset):
         self.noisy_dir = noisy_dir
         self.clean_dir = clean_dir
         self.split = split
-
-        self.transform = (
-            get_train_augmentation() if split == "train"
-            else get_val_augmentation()
-        )
 
         noisy_images = sorted(os.listdir(noisy_dir))
         clean_images = sorted(os.listdir(clean_dir))
@@ -56,26 +55,29 @@ class DenoisingDataset(Dataset):
         self.noisy_images = noisy_images
         self.clean_images = clean_images
 
+        self.geo_aug = get_geometric_aug()
+        self.noisy_aug = get_noisy_only_aug() if split == "train" else None
+        self.to_tensor = get_to_tensor()
+
     def __len__(self):
         return len(self.indices)
 
     def __getitem__(self, idx):
         real_idx = self.indices[idx]
-        noisy = Image.open(
-            os.path.join(self.noisy_dir, self.noisy_images[real_idx])
-        ).convert("L")
 
-        clean = Image.open(
-            os.path.join(self.clean_dir, self.clean_images[real_idx])
-        ).convert("L")
+        noisy = Image.open(os.path.join(self.noisy_dir, self.noisy_images[real_idx])).convert("L")
+        clean = Image.open(os.path.join(self.clean_dir, self.clean_images[real_idx])).convert("L")
 
-        noisy = np.array(noisy)
-        clean = np.array(clean)
-        augmented = self.transform(image=noisy, mask=clean)
-        noisy = augmented["image"] 
-        clean = augmented["mask"]
+        noisy = np.array(noisy, dtype=np.uint8)
+        clean = np.array(clean, dtype=np.uint8)
+
+        out = self.geo_aug(image=noisy, mask=clean)
+        noisy, clean = out["image"], out["mask"]
+
+        if self.noisy_aug is not None:
+            noisy = self.noisy_aug(image=noisy)["image"]
+
+        noisy = self.to_tensor(image=noisy)["image"]
+        clean = self.to_tensor(image=clean)["image"]
 
         return noisy, clean
-
-
-
