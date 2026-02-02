@@ -29,7 +29,7 @@ def get_noisy_only_aug():
         A.OneOf([
             A.RandomBrightnessContrast(brightness_limit=0.15, contrast_limit=0.15, p=1.0),
             A.GaussianBlur(blur_limit=(3, 5), p=1.0),
-            A.GaussNoise(var_limit=(10.0, 40.0), p=1.0),
+            A.GaussNoise(std_range=(0.02, 0.08), p=1.0),
         ], p=0.7),
     ])
 
@@ -82,3 +82,4 @@ class DenoisingDataset(Dataset):
         clean = self.to_tensor(image=clean)["image"]   # [1,H,W]
 
         return noisy, clean
+
