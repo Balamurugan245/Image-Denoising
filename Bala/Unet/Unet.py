@@ -1,7 +1,7 @@
 import torch as t
 import torch.nn as nn
 
-from unet_parts import DoubleConv, Downsample, UpSample
+from Unet_parts import DoubleConv, Downsample, UpSample
 
 class unet(nn.Module):
     def __init__(self, in_channel, num_classes):
@@ -46,3 +46,4 @@ if __name__ == "__main__":
     unet = unet(in_channel=3, num_classes=1)
     res = unet(input_img)
     print(f"Output shape from unet model = {res.shape}")
+
