@@ -17,15 +17,16 @@ def get_train_augmentation(image_size=384):
         A.VerticalFlip(p=0.5),
         A.RandomRotate90(p=0.5),
 
-        A.ShiftScaleRotate(
-            shift_limit=0.05,
-            scale_limit=0.05,
-            rotate_limit=10,
-            border_mode=cv2.BORDER_CONSTANT,
-            value=255,       # input background white
-            mask_value=255,  # target background white (before invert)
+        A.Affine(
+            translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
+            scale=(0.95, 1.05),
+            rotate=(-10, 10),
+            mode=cv2.BORDER_CONSTANT,
+            cval=1.0,       
+            cval_mask=1.0, 
             p=0.5
-        ),
+),
+
 
         A.RandomBrightnessContrast(p=0.3),
         ToTensorV2()
@@ -96,3 +97,4 @@ class DenoisingDataset(Dataset):
             noisy_t = noisy_t.unsqueeze(0)
 
         return noisy_t, clean_t
+
