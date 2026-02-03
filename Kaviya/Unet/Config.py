@@ -1,5 +1,5 @@
 class Config:
-    image_size = 512
+    image_size = 384
     batch_size = 2
     val_ratio = 0.2
 
