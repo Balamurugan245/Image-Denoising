@@ -1,61 +1,48 @@
-import torch
+import torch as t
 import torch.nn as nn
-from Unet_parts import DoubleConv
 
-class Down(nn.Module):
-    def __init__(self, in_c, out_c):
+from unet_parts import DoubleConv, Downsample, UpSample
+
+class unet(nn.Module):
+    def __init__(self, in_channel, num_classes):
         super().__init__()
-        self.conv = DoubleConv(in_c, out_c)
-        self.pool = nn.MaxPool2d(2)
+        self.down_conv1 = Downsample(in_channel=in_channel, out_channel=64,attention_residual=True)
+        self.down_conv2 = Downsample(in_channel=64, out_channel=128)
+        self.down_conv3 = Downsample(in_channel=128, out_channel=256,attention_residual=True)
+        self.down_conv4 = Downsample(in_channel=256, out_channel=512)
+
+        self.bottble_neck = DoubleConv(in_channel=512, out_channels=1024)
+
+        self.up_conv1 = UpSample(in_channel=1024, out_channel=512,attention_residual=True)
+        self.up_conv2 = UpSample(in_channel=512, out_channel=256)
+        self.up_conv3 = UpSample(in_channel=256, out_channel=128,attention_residual=True)
+        self.up_conv4 = UpSample(in_channel=128, out_channel=64)
+
+        self.out = nn.Conv2d(in_channels=64, out_channels=num_classes, kernel_size=(1,1))
+        #self.act = nn.Sigmoid()
 
     def forward(self, x):
-        c = self.conv(x)
-        return c, self.pool(c)
+        conv1, p1 = self.down_conv1(x)
+        conv2, p2 = self.down_conv2(p1)
+        conv3, p3 = self.down_conv3(p2)
+        conv4, p4 = self.down_conv4(p3)
+        
+        btl_nk = self.bottble_neck(p4)
 
+        up1 = self.up_conv1(btl_nk, conv4)
+        up2 = self.up_conv2(up1, conv3)
+        up3 = self.up_conv3(up2, conv2)
+        up4 = self.up_conv4(up3, conv1)
 
-class Up(nn.Module):
-    def __init__(self, in_c, out_c):
-        super().__init__()
-        self.up = nn.ConvTranspose2d(in_c, in_c // 2, 2, stride=2)
-        self.conv = DoubleConv(in_c, out_c)
+        out = self.out(up4)
+        #act_out = self.act(out)
 
-    def forward(self, x1, x2):
-        x1 = self.up(x1)
-        return self.conv(torch.cat([x2, x1], dim=1))
+        return out
+    
+if __name__ == "__main__":
+    input_img = t.randn((1, 3, 512, 512))
+    print(f"Input image shape = {input_img.shape}")
 
-
-class UNetCBAM(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.d1 = Down(1, 64)     
-        self.d2 = Down(64, 128)
-        self.d3 = Down(128, 256)
-        self.d4 = Down(256, 512)
-
-        self.bottleneck = DoubleConv(512, 1024)
-
-        self.u1 = Up(1024, 512)
-        self.u2 = Up(512, 256)
-        self.u3 = Up(256, 128)
-        self.u4 = Up(128, 64)
-
-        self.out = nn.Conv2d(64, 1, 1)  
-
-    def forward(self, x):
-        c1, p1 = self.d1(x)
-        c2, p2 = self.d2(p1)
-        c3, p3 = self.d3(p2)
-        c4, p4 = self.d4(p3)
-
-        b = self.bottleneck(p4)
-
-        x = self.u1(b, c4)
-        x = self.u2(x, c3)
-        x = self.u3(x, c2)
-        x = self.u4(x, c1)
-
-        return torch.sigmoid(self.out(x))
-
-
-
-
+    unet = unet(in_channel=3, num_classes=1)
+    res = unet(input_img)
+    print(f"Output shape from unet model = {res.shape}")
