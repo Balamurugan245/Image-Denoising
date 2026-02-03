@@ -18,11 +18,10 @@ def get_geometric_aug(image_size=384, split="train"):
             A.VerticalFlip(p=0.3),
             A.RandomRotate90(p=0.3),
 
-            # Works across albumentations versions (no unsupported args)
-            A.ShiftScaleRotate(
-                shift_limit=0.05,
-                scale_limit=0.05,
-                rotate_limit=10,
+            A.Affine(
+                translate_percent=(-0.05, 0.05),
+                scale=(0.95, 1.05),
+                rotate=(-10, 10),
                 p=0.5
             ),
         ])
@@ -97,3 +96,4 @@ class DenoisingDataset(Dataset):
         clean_t = self.to_tensor(image=clean)["image"].float()  # [1,H,W]
 
         return noisy_t, clean_t
+
