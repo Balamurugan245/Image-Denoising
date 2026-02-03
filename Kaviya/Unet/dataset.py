@@ -17,20 +17,23 @@ def get_train_augmentation(image_size=384):
         A.VerticalFlip(p=0.5),
         A.RandomRotate90(p=0.5),
 
+        # Replace ShiftScaleRotate with Affine (new albumentations versions)
         A.Affine(
             translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
             scale=(0.95, 1.05),
             rotate=(-10, 10),
             mode=cv2.BORDER_CONSTANT,
-            cval=1.0,       
-            cval_mask=1.0, 
+            cval=1.0,        
+            cval_mask=1.0,  
             p=0.5
-),
+        ),
 
-
+        # only affects image (not mask)
         A.RandomBrightnessContrast(p=0.3),
+
         ToTensorV2()
     ])
+
 
 def get_val_augmentation(image_size=384):
     return A.Compose([
@@ -38,8 +41,18 @@ def get_val_augmentation(image_size=384):
         ToTensorV2()
     ])
 
+
 class DenoisingDataset(Dataset):
-    def __init__(self, noisy_dir, clean_dir, split="train", val_ratio=0.2, image_size=384, invert_target=True):
+    def __init__(
+        self,
+        noisy_dir,
+        clean_dir,
+        split="train",
+        val_ratio=0.2,
+        image_size=384,
+        invert_target=True,
+        seed=42
+    ):
         self.noisy_dir = noisy_dir
         self.clean_dir = clean_dir
         self.split = split.lower()
@@ -51,18 +64,20 @@ class DenoisingDataset(Dataset):
             else get_val_augmentation(image_size=image_size)
         )
 
-        self.noisy_images = sorted(os.listdir(noisy_dir))
-        self.clean_images = sorted(os.listdir(clean_dir))
-        assert len(self.noisy_images) == len(self.clean_images), "Noisy/Clean count mismatch"
+        noisy_files = sorted(os.listdir(noisy_dir))
+        clean_files = set(os.listdir(clean_dir))
 
-        indices = list(range(len(self.noisy_images)))
+        self.files = [f for f in noisy_files if f in clean_files]
+        if len(self.files) == 0:
+            raise RuntimeError("No matching filenames found between Noisy/ and Clean/ folders.")
+
+        indices = list(range(len(self.files)))
         train_idx, val_idx = train_test_split(
             indices,
             test_size=val_ratio,
-            random_state=42,
+            random_state=seed,
             shuffle=True
         )
-
         self.indices = train_idx if self.split == "train" else val_idx
 
     def __len__(self):
@@ -70,31 +85,28 @@ class DenoisingDataset(Dataset):
 
     def __getitem__(self, idx):
         real_idx = self.indices[idx]
+        fname = self.files[real_idx]
 
-        noisy_path = os.path.join(self.noisy_dir, self.noisy_images[real_idx])
-        clean_path = os.path.join(self.clean_dir, self.clean_images[real_idx])
+        noisy_path = os.path.join(self.noisy_dir, fname)
+        clean_path = os.path.join(self.clean_dir, fname)
 
         noisy = Image.open(noisy_path).convert("L")
         clean = Image.open(clean_path).convert("L")
 
-        noisy = np.array(noisy, dtype=np.float32)  # [H,W] 0..255
-        clean = np.array(clean, dtype=np.float32)
-
-        noisy = noisy / 255.0
-        clean = clean / 255.0
+        noisy = np.array(noisy, dtype=np.float32) / 255.0
+        clean = np.array(clean, dtype=np.float32) / 255.0
 
         if self.invert_target:
             clean = 1.0 - clean
 
         augmented = self.transform(image=noisy, mask=clean)
-        noisy_t = augmented["image"].float()  # [1,H,W] float32
-        clean_t = augmented["mask"].float()   # [H,W] or [1,H,W] depending on ToTensorV2 version
 
-        if clean_t.ndim == 2:
-            clean_t = clean_t.unsqueeze(0)
+        noisy_t = augmented["image"].float()
+        clean_t = augmented["mask"].float()
 
         if noisy_t.ndim == 2:
             noisy_t = noisy_t.unsqueeze(0)
+        if clean_t.ndim == 2:
+            clean_t = clean_t.unsqueeze(0)
 
         return noisy_t, clean_t
-
