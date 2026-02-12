@@ -7,8 +7,6 @@ class Config:
     lr = 1e-4
     weight_decay = 1e-5
 
-    ssim_weight = 0.5
-
-    data_root = "/kaggle/input/input-data2k/2kdata/Dataset-1k/New_Data100"
+    data_root = "/kaggle/input/inputdata-2k/2kdata/Dataset-1k/New_Data100"
     checkpoint_dir = "checkpoints"
     prediction_dir = "predictions"
