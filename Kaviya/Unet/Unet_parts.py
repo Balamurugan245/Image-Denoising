@@ -107,4 +107,6 @@ class OutConv(nn.Module):
         self.conv = nn.Conv2d(in_ch, out_ch, kernel_size=1)
 
     def forward(self, x):
-        return self.conv(x)
+        return torch.sigmoid(self.conv(x))
+
+
