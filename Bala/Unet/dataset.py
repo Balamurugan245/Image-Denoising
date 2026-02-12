@@ -76,9 +76,10 @@ class DenoiseDataset(Dataset):
             noisy = augmented["image"]
             clean = augmented["mask"]
 
-        noisy = noisy.float()
-        clean = clean.float() 
+        noisy = noisy.float() / 225
+        clean = clean.float() / 225
 
         return noisy, clean
+
 
 
