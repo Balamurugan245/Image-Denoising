@@ -14,7 +14,7 @@ def get_train_transform():
                 translate_percent=0.02,
                 scale=(0.98, 1.02),
                 rotate=(-2, 2),
-                mode=0,
+                border_mode=0,
                 p=0.5,
             ),
             A.GaussNoise(std_range=(0.02, 0.06), p=0.3),
@@ -81,6 +81,7 @@ class DenoiseDataset(Dataset):
         clean = clean.float() / 225
 
         return noisy, clean
+
 
 
 
