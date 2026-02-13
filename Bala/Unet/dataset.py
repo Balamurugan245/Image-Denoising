@@ -9,21 +9,22 @@ from config import Config
 IMAGE_SIZE = Config.IMAGE_SIZE
 
 def get_train_transform():
-    return A.Compose([
-            A.Resize(IMAGE_SIZE_NEW,IMAGE_SIZE_NEW),
-            A.ShiftScaleRotate(
-                shift_limit=0.02,
-                scale_limit=0.02,
-                rotate_limit=2,
-                border_mode=0,
-                p=0.5
+    return A.Compose(
+        [
+            A.Resize(Config.IMAGE_SIZE, Config.IMAGE_SIZE),
+            A.Affine(
+                translate_percent=0.02,
+                scale=(0.98, 1.02),
+                rotate=(-2, 2),
+                mode=0,
+                p=0.5,
             ),
-            A.GaussNoise(var_limit=(5.0, 15.0), p=0.3),
+            A.GaussNoise(std_range=(0.02, 0.06), p=0.3),
             A.GaussianBlur(blur_limit=3, p=0.2),
-            ToTensorV2()],
-        additional_targets={"mask": "image"}
+            ToTensorV2(),
+        ],
+        additional_targets={"mask": "image"},
     )
-
 
 def get_val_transform():
     return A.Compose([
@@ -82,6 +83,7 @@ class DenoiseDataset(Dataset):
         clean = clean.float() / 225
 
         return noisy, clean
+
 
 
 
